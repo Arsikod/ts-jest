@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "ESNext",
+    "target": "ES2016",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "node"
+  }
+}
