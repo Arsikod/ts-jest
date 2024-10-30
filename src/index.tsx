@@ -1,11 +1,8 @@
-import { AppointmentsDayView } from "./features/appointment/appointment";
+import { App } from "./app";
 import { createRoot } from "react-dom/client";
-import { sampleAppointments } from "./sample-data";
 
 const rootElement = document.getElementById("root");
 
 if (rootElement) {
-  createRoot(rootElement).render(
-    <AppointmentsDayView appointments={sampleAppointments} />
-  );
+  createRoot(rootElement).render(<App />);
 }

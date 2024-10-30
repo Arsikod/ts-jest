@@ -22,8 +22,8 @@ export function element<T extends HTMLElement>(selector: string): T {
   return document.querySelector(selector);
 }
 
-export function elements<T extends Element>(selector: string) {
-  return document.querySelectorAll<T>(selector);
+export function elements<T extends Element>(selector: string): T[] {
+  return Array.from(document.querySelectorAll<T>(selector));
 }
 
 export function typesOf<T extends { type: string }>(elements: T[]) {
@@ -63,4 +63,12 @@ export function changeValue(target: HTMLElement, value: string) {
   Object.defineProperty(event, "target", { writable: false });
 
   act(() => target.dispatchEvent(event));
+}
+
+export function form(): HTMLFormElement {
+  return element("form");
+}
+
+export function field<T extends Element>(fieldName: string): T {
+  return form().elements.namedItem(fieldName) as T;
 }
