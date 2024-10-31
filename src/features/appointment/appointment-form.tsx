@@ -1,13 +1,17 @@
+import { AppointmentItem } from "./appointment-form.test";
 import { TimeSlotTable } from "./time-slot-table";
+import { useState } from "react";
 
 type AppointmentFormProps = {
-  original: {
-    service: string;
-  };
+  original: AppointmentItem;
   selectableServices?: string[];
   salonOpensAt?: number;
   salonClosesAt?: number;
-  today?: Date;
+  today: Date;
+  availableTimeSlots?: {
+    startsAt: number;
+  }[];
+  onSubmit?: (appointment: AppointmentItem) => void;
 };
 
 const defaultServices = [
@@ -25,9 +29,22 @@ export function AppointmentForm({
   salonOpensAt = 9,
   salonClosesAt = 19,
   today = new Date(),
+  availableTimeSlots = [],
+  onSubmit,
 }: AppointmentFormProps) {
+  const [appointment, setAppointment] = useState(original);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    onSubmit?.(appointment);
+  }
+
+  function handleStartsAtChange(startsAt: number) {
+    setAppointment((prev) => ({ ...prev, startsAt }));
+  }
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <select name="service" value={original.service}>
         <option />
 
@@ -40,7 +57,12 @@ export function AppointmentForm({
         salonOpensAt={salonOpensAt}
         salonClosesAt={salonClosesAt}
         today={today}
+        availableTimeSlots={availableTimeSlots}
+        checkedTimeSlot={appointment.startsAt}
+        handleChange={handleStartsAtChange}
       />
+
+      <input type="submit" value="Add" />
     </form>
   );
 }

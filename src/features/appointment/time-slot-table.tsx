@@ -2,10 +2,18 @@ export function TimeSlotTable({
   salonOpensAt,
   salonClosesAt,
   today,
+  availableTimeSlots,
+  checkedTimeSlot,
+  handleChange,
 }: {
   salonOpensAt: number;
   salonClosesAt: number;
   today: Date;
+  availableTimeSlots: {
+    startsAt: number;
+  }[];
+  checkedTimeSlot?: number;
+  handleChange: (startsAt: number) => void;
 }) {
   const timeSlots = dailyTimeSlots(salonOpensAt, salonClosesAt);
 
@@ -25,10 +33,37 @@ export function TimeSlotTable({
         {timeSlots.map((time) => (
           <tr key={time}>
             <th>{toTimeValue(time)}</th>
+
+            {dates.map((date) => (
+              <td key={date}>
+                {availableTimeSlots.some(
+                  (slot) => slot.startsAt === mergeDateAndTime(date, time)
+                ) ? (
+                  <input
+                    type="radio"
+                    name="startsAt"
+                    value={mergeDateAndTime(date, time)}
+                    checked={mergeDateAndTime(date, time) === checkedTimeSlot}
+                    onChange={() => handleChange(mergeDateAndTime(date, time))}
+                  />
+                ) : null}
+              </td>
+            ))}
           </tr>
         ))}
       </tbody>
     </table>
+  );
+}
+
+function mergeDateAndTime(date: number, timeSlot: number) {
+  const time = new Date(timeSlot);
+
+  return new Date(date).setHours(
+    time.getHours(),
+    time.getMinutes(),
+    time.getSeconds(),
+    time.getMilliseconds()
   );
 }
 

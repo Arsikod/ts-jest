@@ -72,3 +72,7 @@ export function form(): HTMLFormElement {
 export function field<T extends Element>(fieldName: string): T {
   return form().elements.namedItem(fieldName) as T;
 }
+
+export function submitButton(): HTMLButtonElement {
+  return element("input[type=submit]");
+}

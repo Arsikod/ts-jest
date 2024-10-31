@@ -16,7 +16,7 @@ export function App() {
         }}
       />
 
-      <AppointmentForm original={{ service: "" }} />
+      <AppointmentForm original={{ service: "" }} today={new Date()} />
     </div>
   );
 }
