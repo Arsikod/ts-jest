@@ -1,12 +1,19 @@
 import { useState } from "react";
 
-type CustomerFormProps = {
-  original?: { firstName: string; lastName: string; phoneNumber: string };
-  onSubmit?: (customer: { firstName: string }) => void;
+export type Customer = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
 };
 
-export function CustomerForm({ original, onSubmit }: CustomerFormProps) {
+type CustomerFormProps = {
+  original?: Customer;
+  onSave?: (customer: Customer) => void;
+};
+
+export function CustomerForm({ original, onSave }: CustomerFormProps) {
   const [customer, setCustomer] = useState(original);
+  const [fetchError, setFetchError] = useState(false);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCustomer((customer) => ({
@@ -15,9 +22,24 @@ export function CustomerForm({ original, onSubmit }: CustomerFormProps) {
     }));
   }
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    onSubmit && onSubmit(customer);
+
+    const result = await fetch("/customers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+      body: JSON.stringify(customer),
+    });
+
+    if (result.ok) {
+      const customerWithId = await result.json();
+      onSave && onSave(customerWithId);
+    } else {
+      setFetchError(true);
+    }
   }
 
   return (
@@ -47,6 +69,11 @@ export function CustomerForm({ original, onSubmit }: CustomerFormProps) {
         onChange={handleChange}
       />
       <button type="submit">Add</button>
+      {fetchError && <ErrorAlert message="An error occurred" />}
     </form>
   );
+}
+
+function ErrorAlert({ message }: { message: string }) {
+  return <p role="alert">{message}</p>;
 }

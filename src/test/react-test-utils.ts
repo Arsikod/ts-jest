@@ -76,3 +76,7 @@ export function field<T extends Element>(fieldName: string): T {
 export function submitButton(): HTMLButtonElement {
   return element("input[type=submit]");
 }
+
+export async function clickAndWait(element: HTMLElement) {
+  await act(async () => clickAction(element));
+}

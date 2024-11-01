@@ -38,11 +38,13 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
+    "resetMocks": true,
     "globals": {
       "IS_REACT_ACT_ENVIRONMENT": true
     },
     "setupFilesAfterEnv": [
-      "./src/test/matchers/dom-matchers.ts"
+      "./src/test/matchers/dom-matchers.ts",
+      "./src/test/global.js"
     ]
   }
 }

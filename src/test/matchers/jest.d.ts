@@ -5,6 +5,7 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toContainText(expected: string): R;
+      toBeCalledWith(received: unknown, ...expectedArguments: unknown[]): R;
     }
   }
 }
