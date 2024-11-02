@@ -21,7 +21,9 @@ describe("CustomerForm", () => {
 
   beforeEach(() => {
     initializeReactContainer();
-    jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseOk({}));
+    jest
+      .spyOn(global, "fetch")
+      .mockResolvedValue(fetchResponseOk("ok") as Response);
   });
 
   function itRendersAsATextBox(fieldName: string) {
@@ -282,7 +284,9 @@ describe("CustomerForm", () => {
       id: 123,
     };
 
-    global.fetch.mockResolvedValue(fetchResponseOk(JSON.stringify(customer)));
+    (global.fetch as jest.Mock).mockResolvedValue(
+      fetchResponseOk(JSON.stringify(customer))
+    );
 
     const saveSpy = jest.fn();
 
@@ -301,7 +305,9 @@ describe("CustomerForm", () => {
 
   describe("when POST returns an error", () => {
     beforeEach(() => {
-      jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseError());
+      jest
+        .spyOn(global, "fetch")
+        .mockResolvedValue(fetchResponseError() as Response);
     });
 
     it("renders an error message", async () => {

@@ -10,7 +10,7 @@ export const todayAt = (
 };
 
 const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
-const tomorrow = new Date(today.getTime() + oneDayInMilliseconds);
+export const tomorrow = new Date(today.getTime() + oneDayInMilliseconds);
 
 export const tomorrowAt = (
   hours: number,

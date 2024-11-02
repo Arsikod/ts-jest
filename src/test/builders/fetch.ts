@@ -1,4 +1,4 @@
-export function fetchResponseOk(body: string) {
+export function fetchResponseOk(body: unknown) {
   return {
     ok: true,
     json: () => Promise.resolve(body),

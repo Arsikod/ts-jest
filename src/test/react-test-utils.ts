@@ -1,17 +1,24 @@
+import { Root, createRoot } from "react-dom/client";
+
 import { act } from "react";
-import { createRoot } from "react-dom/client";
 
 let container: HTMLDivElement | null = null;
+let reactRoot: Root;
 
 export function initializeReactContainer() {
   container = document.createElement("div");
   document.body.replaceChildren(container);
+  reactRoot = createRoot(container);
 }
 
 export function render(component: JSX.Element) {
   act(() => {
-    createRoot(container).render(component);
+    reactRoot.render(component);
   });
+}
+
+export function renderAndWait(component: JSX.Element) {
+  return act(async () => reactRoot.render(component));
 }
 
 export function clickAction<T extends HTMLElement>(element: T) {
