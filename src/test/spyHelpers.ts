@@ -23,7 +23,7 @@ function spy<T extends unknown[]>(): SpyFn<T> {
 }
 
 export function bodyOfLastFetchCall() {
-  const allCalls = global.fetch.mock.calls;
+  const allCalls = (global.fetch as jest.Mock).mock.calls;
   const lastCall = allCalls[allCalls.length - 1];
   return JSON.parse(lastCall[1].body);
 }

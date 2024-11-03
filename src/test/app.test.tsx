@@ -2,13 +2,21 @@ import {
   clickAction,
   element,
   initializeReactContainer,
+  propsOf,
   render,
 } from "./react-test-utils";
 
 import { App } from "../app";
+import { AppointmentFormLoader } from "../features/appointment/appointment-form-loader";
 import { AppointmentsDayViewLoader } from "../appointmentsDayViewLoader";
 import { CustomerForm } from "../customer-form";
+import { act } from "react";
+import { blankAppointment } from "./builders/appointment";
 import { blankCustomer } from "./builders/customer";
+
+jest.mock("../features/appointment/appointment-form-loader", () => ({
+  AppointmentFormLoader: jest.fn(() => <div id="AppointmentFormLoader" />),
+}));
 
 jest.mock("../appointmentsDayViewLoader", () => ({
   AppointmentsDayViewLoader: jest.fn(() => (
@@ -24,6 +32,18 @@ function clickAddCustomerAndAppointment() {
   clickAction(element("menu > li > button:first-of-type"));
 }
 
+export function saveCustomer(customer = { id: 123 }) {
+  act(() => {
+    propsOf(CustomerForm).onSave(customer);
+  });
+}
+
+function saveAppointment() {
+  act(() => {
+    propsOf(AppointmentFormLoader).onSave();
+  });
+}
+
 describe("App", () => {
   beforeEach(() => {
     initializeReactContainer();
@@ -31,7 +51,7 @@ describe("App", () => {
 
   it("initially shows the AppointmentsDayViewLoader", () => {
     render(<App />);
-    expect(AppointmentsDayViewLoader).toHaveBeenCalled();
+    expect(AppointmentsDayViewLoader).toBeRendered();
   });
 
   it("has menu bar", () => {
@@ -47,9 +67,10 @@ describe("App", () => {
     expect(firstButton).toContainText("Add customer and appointment");
   });
 
-  it("displays customer form when button is clicked", () => {
+  it("displays customer form when button is clicked", async () => {
     render(<App />);
-    clickAddCustomerAndAppointment();
+    clickAction(element("menu > li > button:first-of-type"));
+
     expect(element("#CustomerForm")).not.toBeNull();
   });
 
@@ -71,5 +92,51 @@ describe("App", () => {
     render(<App />);
     clickAddCustomerAndAppointment();
     expect(element("menu")).toBeNull();
+  });
+
+  it("displays the AppointmentFormLoader after the CustomerForm is submitted", async () => {
+    render(<App />);
+    clickAddCustomerAndAppointment();
+    saveCustomer();
+    expect(element("#AppointmentFormLoader")).not.toBeNull();
+  });
+
+  it("passes a blank original appointment object to CustomerForm", async () => {
+    render(<App />);
+    clickAddCustomerAndAppointment();
+    saveCustomer();
+    expect(AppointmentFormLoader).toBeRenderedWithProps(
+      expect.objectContaining({
+        original: expect.objectContaining(blankAppointment),
+      })
+    );
+  });
+
+  it("passes the customer to the AppointmentForm", async () => {
+    const customer = {
+      id: 123,
+    };
+
+    render(<App />);
+
+    clickAddCustomerAndAppointment();
+
+    saveCustomer(customer);
+
+    expect(AppointmentFormLoader).toBeRenderedWithProps(
+      expect.objectContaining({
+        original: expect.objectContaining({
+          customer,
+        }),
+      })
+    );
+  });
+
+  it("renders AppointmentDayViewLoade after AppointmentForm is submitted", async () => {
+    render(<App />);
+    clickAddCustomerAndAppointment();
+    saveCustomer();
+    saveAppointment();
+    expect(AppointmentsDayViewLoader).toBeRendered();
   });
 });

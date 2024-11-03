@@ -6,6 +6,7 @@ declare global {
     interface Matchers<R> {
       toContainText(expected: string): R;
       toBeRenderedWithProps(expectedProps: object): R;
+      toBeRendered(): R;
     }
   }
 }

@@ -87,3 +87,9 @@ export function submitButton(): HTMLButtonElement {
 export async function clickAndWait(element: HTMLElement) {
   await act(async () => clickAction(element));
 }
+
+export function propsOf<T extends (...args: any[]) => any>(
+  mockComponent: jest.MockedFunction<T>
+) {
+  return mockComponent.mock.calls[mockComponent.mock.calls.length - 1][0];
+}

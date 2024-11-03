@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 export type Customer = {
+  id: number;
   firstName: string;
   lastName: string;
   phoneNumber: string;
