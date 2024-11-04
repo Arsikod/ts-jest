@@ -93,3 +93,12 @@ export function propsOf<T extends (...args: any[]) => any>(
 ) {
   return mockComponent.mock.calls[mockComponent.mock.calls.length - 1][0];
 }
+
+export function withFocus(target: HTMLElement, fn: () => void) {
+  act(() => {
+    target.focus();
+    fn();
+    target.blur();
+  });
+}
+

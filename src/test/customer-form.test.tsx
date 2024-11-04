@@ -4,9 +4,11 @@ import {
   clickAction,
   clickAndWait,
   element,
+  field,
   initializeReactContainer,
   render,
   submit,
+  withFocus,
 } from "./react-test-utils";
 import { fetchResponseError, fetchResponseOk } from "./builders/fetch";
 
@@ -14,6 +16,7 @@ import { bodyOfLastFetchCall } from "./spyHelpers";
 
 describe("CustomerForm", () => {
   const blankCustomer: Customer = {
+    id: 123,
     firstName: "",
     lastName: "",
     phoneNumber: "",
@@ -50,6 +53,7 @@ describe("CustomerForm", () => {
         firstName: existingValue,
         lastName: "Doe",
         phoneNumber: "012345",
+        id: 123,
       };
 
       render(<CustomerForm original={customer} />);
@@ -300,7 +304,7 @@ describe("CustomerForm", () => {
   it("renders an alert space", async () => {
     render(<CustomerForm original={blankCustomer} />);
 
-    expect(element<HTMLDivElement>("[role=alert]")).toBeNull();
+    expect(element<HTMLDivElement>("[role=alert]")).not.toBeNull();
   });
 
   describe("when POST returns an error", () => {
@@ -328,6 +332,39 @@ describe("CustomerForm", () => {
       await clickAndWait(element<HTMLButtonElement>('button[type="submit"]'));
 
       expect(saveSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("validation", () => {
+    it("renders an alert space for first name validation errors", () => {
+      render(<CustomerForm original={blankCustomer} />);
+      expect(element("#firstNameError[role=alert")).not.toBeNull();
+    });
+
+    it("sets alert as the accessible description for the first name input", async () => {
+      render(<CustomerForm original={blankCustomer} />);
+
+      expect(field("firstName").getAttribute("aria-describedby")).toEqual(
+        "firstNameError"
+      );
+    });
+
+    it("displays error after blur when first name field is blank", async () => {
+      render(<CustomerForm original={blankCustomer} />);
+
+      withFocus(field("firstName"), () => {
+        changeValue(field("firstName"), "");
+      });
+
+      expect(element("#firstNameError[role=alert]")).toContainText(
+        "First name is required"
+      );
+    });
+
+    it("initially has no text in the first name field alert space", () => {
+      render(<CustomerForm original={blankCustomer} />);
+
+      expect(element("#firstNameError[role=alert]").textContent).toEqual("");
     });
   });
 });

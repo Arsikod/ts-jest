@@ -12,9 +12,26 @@ type CustomerFormProps = {
   onSave?: (customer: Customer) => void;
 };
 
+const required = (value: string) =>
+  !value || value.trim() === "" ? "First name is required" : undefined;
+
 export function CustomerForm({ original, onSave }: CustomerFormProps) {
   const [customer, setCustomer] = useState(original);
   const [fetchError, setFetchError] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+
+  function handleBlur(event: React.FocusEvent<HTMLInputElement>) {
+    const result = required(event.target.value);
+
+    setValidationErrors({
+      ...validationErrors,
+      firstName: result,
+    });
+  }
+
+  const hasFirstNameError = () => !!validationErrors.firstName !== undefined;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCustomer((customer) => ({
@@ -52,7 +69,12 @@ export function CustomerForm({ original, onSave }: CustomerFormProps) {
         type="text"
         value={customer.firstName}
         onChange={handleChange}
+        aria-describedby="firstNameError"
+        onBlur={handleBlur}
       />
+      <span id="firstNameError" role="alert">
+        {hasFirstNameError() ? validationErrors.firstName : ""}
+      </span>
       <label htmlFor="lastName">Last Name</label>
       <input
         type="text"
