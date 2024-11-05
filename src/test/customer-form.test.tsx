@@ -336,35 +336,80 @@ describe("CustomerForm", () => {
   });
 
   describe("validation", () => {
-    it("renders an alert space for first name validation errors", () => {
+    function errorFor(fieldName: string) {
+      return element(`#${fieldName}Error[role=alert]`);
+    }
+
+    function itRendersAlertForFieldValidation(fieldName: string) {
+      it(`renders an alert space for ${fieldName} validation errors`, () => {
+        render(<CustomerForm original={blankCustomer} />);
+        expect(errorFor(fieldName)).not.toBeNull();
+      });
+    }
+
+    itRendersAlertForFieldValidation("firstName");
+    itRendersAlertForFieldValidation("lastName");
+    itRendersAlertForFieldValidation("phoneNumber");
+
+    function itSetsAlertAsAccessibleDescriptionForField(fieldName: string) {
+      it(`sets alert as the accessible description for the ${fieldName} input`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        expect(field(fieldName).getAttribute("aria-describedby")).toEqual(
+          `${fieldName}Error`
+        );
+      });
+    }
+
+    itSetsAlertAsAccessibleDescriptionForField("firstName");
+    itSetsAlertAsAccessibleDescriptionForField("lastName");
+    itSetsAlertAsAccessibleDescriptionForField("phoneNumber");
+
+    function itInvalidatesFieldWithValue(
+      fieldName: string,
+      value: string,
+      description: string
+    ) {
+      it(`displays error after blur when ${fieldName} field is ${value}`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        withFocus(field(fieldName), () => {
+          changeValue(field(fieldName), value);
+        });
+
+        expect(errorFor(fieldName)).toContainText(description);
+      });
+    }
+
+    itInvalidatesFieldWithValue("firstName", "", "First name is required");
+    itInvalidatesFieldWithValue("lastName", "", "Last name is required");
+    itInvalidatesFieldWithValue("phoneNumber", "", "Phone number is required");
+    itInvalidatesFieldWithValue(
+      "phoneNumber",
+      "invalid",
+      "Only numbers, spaces, and dashes are allowed"
+    );
+
+    function itInitiallyHasNoTextInTheAlertSpace(fieldName: string) {
+      it(`initially has no text in the ${fieldName} field alert space`, () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        expect(errorFor(fieldName).textContent).toEqual("");
+      });
+    }
+
+    itInitiallyHasNoTextInTheAlertSpace("firstName");
+    itInitiallyHasNoTextInTheAlertSpace("lastName");
+    itInitiallyHasNoTextInTheAlertSpace("phoneNumber");
+
+    it('accepts standard phone number characters when validating "phoneNumber"', () => {
       render(<CustomerForm original={blankCustomer} />);
-      expect(element("#firstNameError[role=alert")).not.toBeNull();
-    });
 
-    it("sets alert as the accessible description for the first name input", async () => {
-      render(<CustomerForm original={blankCustomer} />);
-
-      expect(field("firstName").getAttribute("aria-describedby")).toEqual(
-        "firstNameError"
-      );
-    });
-
-    it("displays error after blur when first name field is blank", async () => {
-      render(<CustomerForm original={blankCustomer} />);
-
-      withFocus(field("firstName"), () => {
-        changeValue(field("firstName"), "");
+      withFocus(field("phoneNumber"), () => {
+        changeValue(field("phoneNumber"), "0123456789");
       });
 
-      expect(element("#firstNameError[role=alert]")).toContainText(
-        "First name is required"
-      );
-    });
-
-    it("initially has no text in the first name field alert space", () => {
-      render(<CustomerForm original={blankCustomer} />);
-
-      expect(element("#firstNameError[role=alert]").textContent).toEqual("");
+      expect(errorFor("phoneNumber").textContent).toEqual("");
     });
   });
 });

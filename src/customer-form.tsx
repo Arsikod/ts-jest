@@ -12,8 +12,29 @@ type CustomerFormProps = {
   onSave?: (customer: Customer) => void;
 };
 
-const required = (value: string) =>
-  !value || value.trim() === "" ? "First name is required" : undefined;
+type Validator = (value: string) => string | undefined;
+function required(description: string) {
+  return (value: string) =>
+    !value || value.trim() === "" ? description : undefined;
+}
+
+function match(regEx: RegExp, description: string) {
+  return (value: string) => (!value.match(regEx) ? description : undefined);
+}
+
+function list(...validators: Validator[]) {
+  return (value: string) => {
+    for (const validator of validators) {
+      const result = validator(value);
+
+      if (result) {
+        return result;
+      }
+    }
+
+    return undefined;
+  };
+}
 
 export function CustomerForm({ original, onSave }: CustomerFormProps) {
   const [customer, setCustomer] = useState(original);
@@ -22,16 +43,23 @@ export function CustomerForm({ original, onSave }: CustomerFormProps) {
     Record<string, string>
   >({});
 
-  function handleBlur(event: React.FocusEvent<HTMLInputElement>) {
-    const result = required(event.target.value);
+  function handleBlur({ target }: React.FocusEvent<HTMLInputElement>) {
+    const validators: Record<string, Validator> = {
+      firstName: required("First name is required"),
+      lastName: required("Last name is required"),
+      phoneNumber: list(
+        required("Phone number is required"),
+        match(/^[0-9+()\-]*$/, "Only numbers, spaces, and dashes are allowed")
+      ),
+    };
+
+    const result = validators[target.name](target.value);
 
     setValidationErrors({
       ...validationErrors,
-      firstName: result,
+      [target.name]: result,
     });
   }
-
-  const hasFirstNameError = () => !!validationErrors.firstName !== undefined;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCustomer((customer) => ({
@@ -60,6 +88,18 @@ export function CustomerForm({ original, onSave }: CustomerFormProps) {
     }
   }
 
+  function hasFieldError(fieldName: string) {
+    return validationErrors[fieldName] !== undefined;
+  }
+
+  function renderError(fieldName: string) {
+    return (
+      <span id={`${fieldName}Error`} role="alert">
+        {hasFieldError(fieldName) ? validationErrors[fieldName] : ""}
+      </span>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <label htmlFor="firstName">First Name</label>
@@ -72,9 +112,7 @@ export function CustomerForm({ original, onSave }: CustomerFormProps) {
         aria-describedby="firstNameError"
         onBlur={handleBlur}
       />
-      <span id="firstNameError" role="alert">
-        {hasFirstNameError() ? validationErrors.firstName : ""}
-      </span>
+      {renderError("firstName")}
       <label htmlFor="lastName">Last Name</label>
       <input
         type="text"
@@ -82,7 +120,10 @@ export function CustomerForm({ original, onSave }: CustomerFormProps) {
         id="lastName"
         value={customer.lastName}
         onChange={handleChange}
+        aria-describedby="lastNameError"
+        onBlur={handleBlur}
       />
+      {renderError("lastName")}
       <label htmlFor="phoneNumber">Phone Number</label>
       <input
         type="text"
@@ -90,7 +131,10 @@ export function CustomerForm({ original, onSave }: CustomerFormProps) {
         id="phoneNumber"
         value={customer.phoneNumber}
         onChange={handleChange}
+        aria-describedby="phoneNumberError"
+        onBlur={handleBlur}
       />
+      {renderError("phoneNumber")}
       <button type="submit">Add</button>
       {fetchError && <ErrorAlert message="An error occurred" />}
     </form>
